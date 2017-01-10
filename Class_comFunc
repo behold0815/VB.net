@@ -25,4 +25,119 @@ Public Class comFunc
 		GC.Collect()
 
 	End Function
+	
+	'execute SQL command(select command not included)
+	Sub exeNonQuery(ByVal sqlStr As String)
+
+		Dim conn As New SqlConnection
+		Dim cmmd As New SqlCommand
+		conn.ConnectionString = WebConfigurationManager.ConnectionStrings(connStr).ConnectionString()
+		conn.Open()
+		cmmd.Connection = conn
+		cmmd.CommandText = sqlStr
+		cmmd.ExecuteNonQuery()
+		cmmd.Dispose()
+		conn.Close()
+		SqlConnection.ClearPool(conn)
+		GC.Collect()
+
+	End Sub
+	
+	'create dropdown list
+	'reader is sql reader
+	'obj is dropdownlist obj
+	'value passed the database table sheet column name
+	'text passed the database table sheet column name
+	Sub createDropDownListItems(ByRef reader As Object, ByRef obj As Object, ByVal value As String, ByVal text As String)
+		If reader.HasRows Then
+			obj.Add(New ListItem("select here", "-1"))
+		Else
+			obj.Add(New ListItem("nothing", "-1"))
+		End If
+
+		'add listitem
+		Do While reader.Read()
+			obj.Add(New ListItem(reader(value), reader(text)))
+		Loop
+		reader.close()
+		GC.Collect()
+	End Sub
+	
+	'create CheckBoxList and set "selected"
+	'reader is sql reader
+	'obj is dropdownlist obj
+	'value passed the database table sheet column name
+	'text passed the database table sheet column name
+	'selected passed the database table sheet column name
+	Function createCBLSelectedItems(ByRef reader As Object, ByRef obj As Object, ByVal value As String,
+									ByVal text As String, ByVal selected As String) As Boolean
+		If reader.HasRows Then
+			Dim t As ListItem
+			Do While reader.Read()
+				t = New ListItem(reader(text), reader(value))
+				If reader(selected) Then
+					t.Selected = True
+				End If
+				obj.Add(t)
+			Loop
+			Return True
+		Else
+			Return False
+		End If
+		reader.close()
+		GC.Collect()
+	End Function
+	
+	'create CheckBoxList
+	'reader is sql reader
+	'obj is dropdownlist obj
+	'value passed the database table sheet column name
+	'text passed the database table sheet column name
+	Function createCheckBoxListItems(ByRef reader As Object, ByRef obj As Object, ByVal value As String, ByVal text As String) As Boolean
+		If reader.HasRows Then
+			Do While reader.Read()
+				obj.Add(New ListItem(reader(text), reader(value)))
+			Loop
+			Return True
+		Else
+			Return False
+		End If
+		reader.close()
+		GC.Collect()
+	End Function
+	
+	'get all the selected checkbox values and return as arraylist
+	'obj is CheckBox
+	Function getValueFromCheckBox(ByRef obj As Object) As Object
+		Dim tmpArrayList As New ArrayList
+		For Each list As ListItem In obj.Items
+			If list.Selected Then
+				tmpArrayList.Add(list.Value)
+			End If
+		Next
+		Return tmpArrayList
+	End Function
+	
+	'checkbox are not all checked return true else false
+	Function allAreNotChecked(ByRef obj As Object) As Boolean
+		For Each list As ListItem In obj.Items
+			If list.Selected Then
+				Return False
+			End If
+		Next
+		Return True
+	End Function
+	
+	'remove SQL injection characters
+	Function killchart(ByVal str As String) As String
+		Dim badChars() As String = {"select", "drop", ";", "--", "=", "insert", "delete", "xp_", "update", "'", " ", "　", "chr(34)"}
+		Dim newChars As String = ""
+		Dim kci As Integer
+		For kci = 0 To UBound(badChars)
+			newChars = Replace(str, badChars(kci), "")
+		Next
+		Return newChars
+	End Function
+	
+	
 End Class 
