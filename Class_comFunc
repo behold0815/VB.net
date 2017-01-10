@@ -6,10 +6,10 @@ Imports System.Security.Cryptography
 
 Public Class comFunc
 
-	Private connStr As String = "連線字串"
+	Private connStr As String = "connectionString"
 	Private now As DateTime = Date.Now
 
-	'執行SQL指令，connStr寫死版
+	'execute SQL command
 	Function excuteSQL(ByVal sqlStr As String) As Object
 
 		Dim reader As SqlDataReader
