@@ -1,0 +1,28 @@
+Imports Microsoft.VisualBasic
+Imports System.Data.SqlClient
+Imports System.Configuration.ConfigurationManager
+Imports System.Web.Configuration
+Imports System.Security.Cryptography
+
+Public Class comFunc
+
+	Private connStr As String = "連線字串"
+	Private now As DateTime = Date.Now
+
+	'執行SQL指令，connStr寫死版
+	Function excuteSQL(ByVal sqlStr As String) As Object
+
+		Dim reader As SqlDataReader
+		Dim objCon As SqlConnection = New SqlConnection(ConnectionStrings(connStr).ConnectionString)
+		objCon.Open()
+		Dim myCommand As SqlCommand = New SqlCommand(sqlStr, objCon)
+		reader = myCommand.ExecuteReader()
+		Return reader
+		myCommand.Dispose()
+		reader.Close()
+		objCon.Close()
+		SqlConnection.ClearPool(objCon)
+		GC.Collect()
+
+	End Function
+End Class 
